@@ -1,5 +1,7 @@
 import pandas as pd
 import datetime
+import argparse
+
 
 def parseMonth(month):
     d = datetime.datetime.strptime(month, '%b %Y')
@@ -9,8 +11,14 @@ def parseMonth(month):
         d = d.replace(month=d.month+1)
     return d - datetime.timedelta(days=1)
 
-list = ['https://www.indexmundi.com/commodities/?commodity=hard-sawn-wood',
-'https://www.indexmundi.com/commodities/?commodity=hard-sawn-wood',
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--csv', action = 'store', required=False)
+parser.add_argument('--xlsx', action = 'store', required=False)
+
+args = parser.parse_args()
+
+l = ['https://www.indexmundi.com/commodities/?commodity=hard-sawn-wood',
 'https://www.indexmundi.com/commodities/?commodity=hard-logs',
 'https://www.indexmundi.com/commodities/?commodity=plywood',
 'https://www.indexmundi.com/commodities/?commodity=soft-logs',
@@ -27,9 +35,8 @@ data = {
 
 df = pd.DataFrame(data)
 
-for url in list:
+for url in l:
     tables = pd.read_html(url)
-
     table = tables[1]
     
     table['Month'] = table['Month'].transform(parseMonth)
@@ -38,4 +45,7 @@ for url in list:
 
     df = df.append(table)
 
-df.to_csv('result.csv', columns = ['Month', 'Price'], index=False)
+if args.csv != None:
+    df.to_csv(args.csv, columns = ['Month', 'Price'], index=False)
+if args.xlsx != None:
+    df.to_excel(args.xlsx, columns = ['Month', 'Price'], index=False)
